@@ -1,0 +1,9 @@
+"..\Output\main.obj",
+"..\Output\interrupt.obj",
+"..\Output\common.obj",
+"..\Output\display.obj",
+"..\Output\keyboard.obj",
+"..\Output\rewrite.obj",
+"..\Output\uart.obj" 
+TO "..\Output\KeilProject" 
+PRINT(".\Listings\KeilProject.m51") RAMSIZE(256) 

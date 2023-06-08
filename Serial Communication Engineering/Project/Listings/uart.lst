@@ -1,0 +1,59 @@
+C51 COMPILER V9.60.7.0   UART                                                              06/08/2023 19:44:31 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE UART
+OBJECT MODULE PLACED IN ..\Output\uart.obj
+COMPILER INVOKED BY: D:\User Software\Designer\Microcontroller - Keil\Initial\C51\BIN\C51.EXE ..\System\uart.c OPTIMIZE(
+                    -8,SPEED) BROWSE INCDIR(..\Main;..\System;..\Library) DEFINE(DEBUG_ENABLE_SEMIHOST) DEBUG OBJECTEXTEND PRINT(.\Listings\u
+                    -art.lst) OBJECT(..\Output\uart.obj)
+
+line level    source
+
+   1          #include "uart.h"
+   2          
+   3          //全局变量声明
+   4          extern uchar receive, send;
+   5          extern uchar receiveArr[];
+   6          extern uint temp;
+   7          extern uchar keyValue, preKeyValue;
+   8          extern uchar code displayArr[];
+   9          extern uchar state;
+  10          extern uchar i;
+  11          extern uchar x1, x2;
+  12          
+  13          //串口通信发送数据
+  14          void uartSend(uchar IN) {
+  15   1      
+  16   1              SBUF = IN;
+  17   1              while(!TI);
+  18   1              TI = 0;
+  19   1      
+  20   1      }
+  21          
+  22          //串口通信初始化
+  23          void uartInit() {
+  24   1      
+  25   1              TMOD |= 0x20;
+  26   1              PCON = 0x80;
+  27   1              SCON = 0x50;
+  28   1              TH1 = 0xfa;
+  29   1              TL1 = TH1;      
+  30   1              EA = 1;
+  31   1              ES = 1;
+  32   1              ET1 = 0; TR1 = 1;       
+  33   1              
+  34   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     32    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

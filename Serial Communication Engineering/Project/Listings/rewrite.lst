@@ -1,0 +1,46 @@
+C51 COMPILER V9.60.7.0   REWRITE                                                           06/08/2023 19:44:30 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE REWRITE
+OBJECT MODULE PLACED IN ..\Output\rewrite.obj
+COMPILER INVOKED BY: D:\User Software\Designer\Microcontroller - Keil\Initial\C51\BIN\C51.EXE ..\System\rewrite.c OPTIMI
+                    -ZE(8,SPEED) BROWSE INCDIR(..\Main;..\System;..\Library) DEFINE(DEBUG_ENABLE_SEMIHOST) DEBUG OBJECTEXTEND PRINT(.\Listing
+                    -s\rewrite.lst) OBJECT(..\Output\rewrite.obj)
+
+line level    source
+
+   1          #include "rewrite.h"
+   2          #include "interrupt.h"
+   3          #include "uart.h"
+   4          
+   5          //全局变量声明
+   6          extern uchar receive, send;
+   7          extern uchar receiveArr[];
+   8          extern uint temp;
+   9          extern uchar keyValue, preKeyValue;
+  10          extern uchar code displayArr[];
+  11          extern uchar state;
+  12          extern uchar i;
+  13          extern uchar x1, x2;
+  14          
+  15          //重写 putchar 方法，实现 printf 函数调用
+  16          char putchar(char c) {
+  17   1      
+  18   1              uartSend(c);
+  19   1              return c;
+  20   1      
+  21   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      8    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

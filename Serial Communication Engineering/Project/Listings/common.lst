@@ -1,0 +1,158 @@
+C51 COMPILER V9.60.7.0   COMMON                                                            06/08/2023 19:44:30 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE COMMON
+OBJECT MODULE PLACED IN ..\Output\common.obj
+COMPILER INVOKED BY: D:\User Software\Designer\Microcontroller - Keil\Initial\C51\BIN\C51.EXE ..\System\common.c OPTIMIZ
+                    -E(8,SPEED) BROWSE INCDIR(..\Main;..\System;..\Library) DEFINE(DEBUG_ENABLE_SEMIHOST) DEBUG OBJECTEXTEND PRINT(.\Listings
+                    -\common.lst) OBJECT(..\Output\common.obj)
+
+line level    source
+
+   1          #include "common.h"
+   2          #include "interrupt.h"
+   3          
+   4          #include <intrins.h>
+   5          #include <string.h>
+   6                  
+   7          //用于发送、接收串口通信数据
+   8          uchar receive = 0, send = 0;
+   9          uchar receiveArr[8];
+  10          //用于中断定时器轮询
+  11          uint temp = 1;
+  12          //用于矩阵扫描的高低电平切换
+  13          uchar keyValue = 0, preKeyValue = 0;
+  14          //用于数码管显示（0 ~ F）
+  15          uchar code displayArr[] = {
+  16          
+  17                  0xc0, 0xf9, 0xa4, 0xb0,
+  18                  0x99, 0x92, 0x82, 0xf8,
+  19                  0x80, 0x90, 0x88, 0x83,
+  20                  0xc6, 0xa1, 0x86, 0x8e
+  21          
+  22          };
+  23          //用于改变流水灯状态（状态机模式）
+  24          uchar state = 0;
+  25          //用于数组索引
+  26          uchar i = 0;
+  27          //用于灯状态取反（灯1、灯2）
+  28          uchar x1 = 1, x2 = 1;
+  29          
+  30          //串口通信数据接收合并
+  31          void merge() {
+  32   1                      
+  33   1              
+  34   1              if(receive != '#' & receive != 0) {
+  35   2              
+  36   2                      receiveArr[i++] = receive;
+  37   2              
+  38   2              } else {
+  39   2              
+  40   2                      receiveArr[i] = '\0';
+  41   2                      i = 0;
+  42   2                      compare();
+  43   2              
+  44   2              }
+  45   1      
+  46   1      }
+  47          
+  48          //比较合并字符，改变 P1 状态（取反、流水灯）
+  49          //P1 = ((P1 & 0x04) ^ 0x04) | (P1 & 0xfb);
+  50          void compare() {
+  51   1      
+  52   1              if(strcmp(receiveArr, "Led0:OFF") == 0) {
+  53   2              
+C51 COMPILER V9.60.7.0   COMMON                                                            06/08/2023 19:44:30 PAGE 2   
+
+  54   2                      P1 &= 0xfb;
+  55   2              
+  56   2              } else if(strcmp(receiveArr, "Led0:ON") == 0){
+  57   2                      
+  58   2                      P1 = 0x04 | (P1 & 0xfb);
+  59   2              
+  60   2              }
+  61   1              if(strcmp(receiveArr, "Led1:OFF") == 0) {
+  62   2      
+  63   2                      P1 &= 0xf7;
+  64   2      
+  65   2              } else if(strcmp(receiveArr, "Led1:ON") == 0){
+  66   2              
+  67   2                      P1 = 0x08 | (P1 & 0xf7);
+  68   2              
+  69   2              }
+  70   1              
+  71   1              if(strcmp(receiveArr, "left") == 0) {
+  72   2      
+  73   2                      state = 1;
+  74   2      
+  75   2              }else if(strcmp(receiveArr, "right") == 0) {
+  76   2      
+  77   2                      state = 2; 
+  78   2      
+  79   2              }else if(strcmp(receiveArr, "flashing") == 0) {
+  80   2      
+  81   2                      state = 3;
+  82   2      
+  83   2              }else if(strcmp(receiveArr, "Time out") == 0) {
+  84   2      
+  85   2                      state = 0;
+  86   2                      
+  87   2              }
+  88   1      
+  89   1      }
+  90          
+  91          //判断流水灯状态并按相应方式运行（暂停、左移、右移、闪烁）
+  92          void stateMachine(uchar IN) {
+  93   1      
+  94   1              if(temp % 500 == 0) {
+  95   2                      
+  96   2                      switch(IN) {
+  97   3                      
+  98   3                              case 0 : ; break;
+  99   3                              case 1 :
+ 100   3                                      switch(P1 & 0xf0) {
+ 101   4                                      
+ 102   4                                              case 0: case 0xf0: P1 = 0x10 | (P1 & 0x0f); break;
+ 103   4                                              case 0x10: P1 = 0x20 | (P1 & 0x0f); break;
+ 104   4                                              case 0x20: P1 = 0x40 | (P1 & 0x0f); break;
+ 105   4                                              case 0x40: P1 = 0x80 | (P1 & 0x0f); break;
+ 106   4                                              case 0x80: P1 = 0x10 | (P1 & 0x0f); break;
+ 107   4                                      
+ 108   4                                      };
+ 109   3                              break;          
+ 110   3                              case 2 :
+ 111   3                                      switch(P1 & 0xf0) {
+ 112   4                                      
+ 113   4                                              case 0: case 0xf0: P1 = 0x80 | (P1 & 0x0f); break;
+ 114   4                                              case 0x10: P1 = 0x80 | (P1 & 0x0f); break;
+ 115   4                                              case 0x20: P1 = 0x10 | (P1 & 0x0f); break;
+C51 COMPILER V9.60.7.0   COMMON                                                            06/08/2023 19:44:30 PAGE 3   
+
+ 116   4                                              case 0x40: P1 = 0x20 | (P1 & 0x0f); break;
+ 117   4                                              case 0x80: P1 = 0x40 | (P1 & 0x0f); break;
+ 118   4                                      
+ 119   4                                      };
+ 120   3                              break;
+ 121   3                              case 3 :
+ 122   3                                      P1 = ((P1 & 0xf0) ^ 0xf0) | (P1 & 0x0f);
+ 123   3                              break;
+ 124   3                      
+ 125   3                      }
+ 126   2                      
+ 127   2              }
+ 128   1      
+ 129   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    386    ----
+   CONSTANT SIZE    =     79    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     18    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
